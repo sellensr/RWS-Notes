@@ -5,9 +5,12 @@
 #include <TimeLib.h>
 #include "RWS_WiFi_Multi.h"
 
-unsigned long sendNTPpacket(IPAddress& address);
-int NTPsetup();
+void sendNTPpacket(IPAddress& address);
+time_t NTPsetup();
 time_t getNtpTime();
-void stampNtpTime(String *ts,time_t t);
+
+void stampDate(String *ts,time_t t);
+void stampTime(String *ts,time_t t);
+void stampDateTime(String *ts,time_t t);
 
 #endif //_RWS_NTP_h

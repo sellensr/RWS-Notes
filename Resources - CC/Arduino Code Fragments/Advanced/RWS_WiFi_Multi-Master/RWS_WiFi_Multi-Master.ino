@@ -87,16 +87,30 @@ void setup() {
     Serial.print(ip);
     Serial.print(" on SSID: ");
     Serial.println(WiFi.SSID());
-    NTPsetup();   // initialize the time from the NTP server
+    time_t ut = NTPsetup();   // initialize the time from the NTP server
+    Serial.print("NTPsetup returns: "); Serial.println(ut);
   } else Serial.print("\nTried everything, but there's no wifi connection... Sorry\n\n");
 }
 
 void loop() {
   int i = 0;
-  String timeStamp = "";
+  String dateTimeStamp = "";
+  String timeOnlyStamp = "";
+
+  String stamp = "";
+  time_t utLOC = now();
+  time_t utNTP = getNtpTime();
+  //while(utNTP == 0) utNTP = getNTPtime();
+  Serial.print("LOC: "); stampDateTime(&stamp,utLOC); Serial.print(stamp); Serial.print("  ");
+  stamp = "";
+  Serial.print("NTP: "); stampTime(&stamp,utNTP); Serial.print(stamp); Serial.print("\n");
+
+
   // refresh and print the time stamp every time
-  stampNtpTime(&timeStamp, now() + FROM_UTC * 3600L);
-  Serial.print("\n"); Serial.println(timeStamp); delay(1000);
+  time_t ut = now() + FROM_UTC * 3600L;
+  stampDateTime(&dateTimeStamp, ut);
+  stampTime(&timeOnlyStamp, ut);
+  Serial.print("\n"); Serial.print(dateTimeStamp); delay(1000); Serial.print("   "); Serial.println(timeOnlyStamp);
   
   #ifdef USE_WIFI_SECURE
     #if defined(ESP32) || defined(ESP8266)

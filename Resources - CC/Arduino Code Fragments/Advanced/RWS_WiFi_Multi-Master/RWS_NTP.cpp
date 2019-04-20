@@ -1,93 +1,93 @@
 /*
 Assumes a working WiFi connection
-Adapted by Rick Sellens 2016-02-06 from:
+Adapted by Rick Sellens 2019-04-20 from:
 
- Udp NTP Client https://github.com/esp8266/Arduino/blob/master/libraries/ESP8266WiFi/examples/NTPClient/NTPClient.ino
-
- Get the time from a Network Time Protocol (NTP) time server
- Demonstrates use of UDP sendPacket and ReceivePacket
- For more on NTP time servers and the messages needed to communicate with them,
- see http://en.wikipedia.org/wiki/Network_Time_Protocol
-
- created 4 Sep 2010
- by Michael Margolis
- modified 9 Apr 2012
- by Tom Igoe
- updated for the ESP8266 12 Apr 2015 
- by Ivan Grokhotkov
-
- This code is in the public domain.
-
+ TimeNTP example at https://github.com/PaulStoffregen/Time
  */
 
 #include "RWS_NTP.h"
 
 /* Don't hardwire the IP address or we won't get the benefits of the pool.
  *  Lookup the IP address for the host name instead */
-IPAddress timeServerIP;                       // time.nist.gov NTP server address
+IPAddress timeServer;                         // time.nist.gov NTP server address, class passes by reference
 //const char* nistHost = "time.nist.gov";     // Round-robin DAYTIME protocol
 //const char* ntpServerName = "time.nist.gov";
 const char* ntpServerName = "pool.ntp.org";   // may be more available than nist
-unsigned int localPort = 2390;        // local port to listen for UDP packets
-const int NTP_PACKET_SIZE = 48;       // NTP time stamp is in the first 48 bytes of the message
-byte packetBuffer[ NTP_PACKET_SIZE];  // buffer to hold incoming and outgoing packets
-WiFiUDP udp;                          // a UDP instance to send/receive the packets
+unsigned int localPort = 2390;                // local port to listen for UDP packets
+WiFiUDP Udp;                                  // a UDP instance to send/receive the packets
+const int timeZone = 0;                       // UTC
 
-int NTPsetup(){
-  udp.begin(localPort);
+time_t NTPsetup(){
+  Udp.begin(localPort);
+  WiFi.hostByName(ntpServerName, timeServer); // both passed by reference
   setSyncProvider(getNtpTime);
   setSyncInterval((time_t) SECS_PER_DAY);
-  return 0;
+  time_t ut = getNtpTime();                     
+  setTime(ut);                                // init the Time library 
+  return ut;
 }
 
-time_t getNtpTime()
-{ // returns the number of seconds since Jan 1 1970, or 0 on failure (unix epoch)
-  // call often enough to avoid lost time due to interrupts
-  WiFi.hostByName(ntpServerName, timeServerIP); 
-  sendNTPpacket(timeServerIP);    // send an NTP packet to a time server
-  //Serial.print("NTP request sent... ");
-  unsigned long NTPmillis = millis() - 1000;    // approximate adjustment for network latency
-  delay(2000);        // wait to see if a reply is available
-  int cb = udp.parsePacket();
-  if (!cb) {
-    //Serial.println("no packet yet");
-    return 0;
-  }
-  else {
-    //Serial.print("packet received, length=");
-    //Serial.println(cb);
-    // We've received a packet, read the data from it
-    udp.read(packetBuffer, NTP_PACKET_SIZE); // read the packet into the buffer
-
-    //the timestamp starts at byte 40 of the received packet and is four bytes,
-    // or two words, long. First, extract the two words:
-    unsigned long highWord = word(packetBuffer[40], packetBuffer[41]);
-    unsigned long lowWord = word(packetBuffer[42], packetBuffer[43]);
-    // combine the four bytes (two words) into a long integer
-    // this is NTP time (seconds since Jan 1 1900) - 70 years of seconds = unix epoch:
-    time_t NTPlast = (highWord << 16 | lowWord) - 2208988800UL;
-    setTime(NTPlast + (millis()-NTPmillis)/1000);   // adjust for elapsed time
-    return NTPlast + (millis()-NTPmillis)/1000;
-  }
+void stampDateTime(String *ts,time_t t)
+{   // adds an ISO YYYY-MM-DD hh:mm:ss date and time stamp onto the string, uses now() if t = 0
+  stampDate(ts,t);
+  *ts += " ";
+  stampTime(ts,t);
 }
 
-void stampNtpTime(String *ts,time_t t)
-{   // puts a time stamp into the string, uses now() if t = 0
+void stampDate(String *ts,time_t t)
+{   // adds an ISO YYYY-MM-DD date stamp onto the string, uses now() if t = 0
   if(t == (time_t) 0) t = now();
-  unsigned h,m,s,y,mn,d;
-  h = hour(t); m = minute(t); s = second(t); y = year(t); mn = month(t); d = day(t);
-  *ts = (String) y; *ts += "-";
+  unsigned y,mn,d;
+  y = year(t); mn = month(t); d = day(t);
+  *ts += (String) y; *ts += "-";
   if(mn < 10) *ts += "0"; *ts += (String) mn; *ts += "-";
-  if(d < 10) *ts += "0"; *ts += (String) d; *ts += " ";    
+  if(d < 10) *ts += "0"; *ts += (String) d;    
+}
+
+void stampTime(String *ts,time_t t)
+{   // adds an hh:mm:ss time stamp onto the string, uses now() if t = 0
+  if(t == (time_t) 0) t = now();
+  unsigned h,m,s;
+  h = hour(t); m = minute(t); s = second(t);
   if(h < 10) *ts += "0"; *ts += (String) h; *ts += ":";
   if(m < 10) *ts += "0"; *ts += (String) m; *ts += ":";
   if(s < 10) *ts += "0"; *ts += (String) s; 
 }
 
-// send an NTP request to the time server at the given address
-unsigned long sendNTPpacket(IPAddress& address)
+// Copied from the Time library NTP example 2019-04-20
+// Debug code commented out, wait time raised to 2000
+/*-------- NTP code ----------*/
+
+const int NTP_PACKET_SIZE = 48; // NTP time is in the first 48 bytes of message
+byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming & outgoing packets
+
+time_t getNtpTime()
 {
-//  Serial.println("sending NTP packet...");
+  while (Udp.parsePacket() > 0) ; // discard any previously received packets
+  //Serial.println("Transmit NTP Request");
+  sendNTPpacket(timeServer);
+  uint32_t beginWait = millis();
+  while (millis() - beginWait < 2000) {
+    int size = Udp.parsePacket();
+    if (size >= NTP_PACKET_SIZE) {
+      //Serial.println("Receive NTP Response");
+      Udp.read(packetBuffer, NTP_PACKET_SIZE);  // read packet into the buffer
+      unsigned long secsSince1900;
+      // convert four bytes starting at location 40 to a long integer
+      secsSince1900 =  (unsigned long)packetBuffer[40] << 24;
+      secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
+      secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
+      secsSince1900 |= (unsigned long)packetBuffer[43];
+      return secsSince1900 - 2208988800UL + timeZone * SECS_PER_HOUR;
+    }
+  }
+  //Serial.println("No NTP Response :-(");
+  return 0; // return 0 if unable to get the time
+}
+
+// send an NTP request to the time server at the given address
+void sendNTPpacket(IPAddress &address)
+{
   // set all bytes in the buffer to 0
   memset(packetBuffer, 0, NTP_PACKET_SIZE);
   // Initialize values needed to form NTP request
@@ -101,10 +101,9 @@ unsigned long sendNTPpacket(IPAddress& address)
   packetBuffer[13]  = 0x4E;
   packetBuffer[14]  = 49;
   packetBuffer[15]  = 52;
-
   // all NTP fields have been given values, now
-  // you can send a packet requesting a timestamp:
-  udp.beginPacket(address, 123); //NTP requests are to port 123
-  udp.write(packetBuffer, NTP_PACKET_SIZE);
-  udp.endPacket();
+  // you can send a packet requesting a timestamp:                 
+  Udp.beginPacket(address, 123); //NTP requests are to port 123
+  Udp.write(packetBuffer, NTP_PACKET_SIZE);
+  Udp.endPacket();
 }
