@@ -13,7 +13,7 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);     // set the serial port speed
   P("\n\nRick's S1.2\n\n"); // worth printing out the name of the sketch to document
-  P("Time [s], Pin 10, A0\n"); // provide headings to name the outputs
+  P("Time [s], Pin 10, A0, Delta t [us]\n"); // provide headings to name the outputs
   pinMode(10,INPUT);
   pinMode(13,OUTPUT);
 }
@@ -38,7 +38,8 @@ void loop() {
 
   P(timeNowS,3);           // Print out current status, to 3 places usually precise enough
   PCS(d);
-  PCSL(a);
+  PCS(a);
+  PCSL(dt);
 
   timeLast = timeNow;      // save the old value for next time through the loop
 
