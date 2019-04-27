@@ -93,8 +93,7 @@ void loop()
       Serial.print("I2C device found at address 0x");
       if (address < 16)
         Serial.print("0");
-      Serial.print(address, HEX);
-      Serial.println("  !");
+      Serial.println(address, HEX);
       if (address == BMX_ADDRESS_A || address == BMX_ADDRESS_B) {
         unsigned sensorID = checkBMX(address);
         if (sensorID) {
