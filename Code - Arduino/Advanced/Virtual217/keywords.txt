@@ -1,0 +1,32 @@
+#######################################
+# Syntax Coloring Map For Virtual217
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+analogReferenceV	KEYWORD2
+analogReadV		KEYWORD2
+randnV			KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+PSEUDO_GROUND	LITERAL1   
+GAIN       	LITERAL1
+USB_VOLTAGE     LITERAL1
+V33             LITERAL1
+V11          	LITERAL1
+INTERNAL	LITERAL1
+
