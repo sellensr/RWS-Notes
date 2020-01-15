@@ -30,6 +30,7 @@
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);     // set the serial port speed
+  while(!Serial && millis() < 5000);
   P("\n\nRick's S1.3\n\n"); // worth printing out the name of the sketch to document
   P("Time [s], Time [us], Time [us], Pin 10, A0, dt, w, A0 Smoothed\n"); // provide headings to name the outputs
   pinMode(10,INPUT);

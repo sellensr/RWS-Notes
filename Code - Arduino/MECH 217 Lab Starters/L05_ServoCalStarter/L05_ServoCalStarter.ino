@@ -6,19 +6,19 @@ float aZero, a180, sens;
 
 void setup() {
   Serial.begin(115200);
-  analogReference(EXTERNAL);      // choose an analog reference that works for output voltage
+//  analogReference(EXTERNAL);      // choose an analog reference that works for output voltage
 
   // Start by getting some calibration values
   
   myservo.attach(9);              // bring the servo under UNO control
-  myservo.write(0); delay(3000);  // send it to zero and wait long enough
+  myservo.write(0); delay(6000);  // send it to zero and wait long enough
   myservo.detach();               // stop driving the servo
   aZero = 0;                      // get an average reading from the potentiometer
   for (int i = 0; i < 100; i++) aZero += analogRead(A0);
   aZero /= 100;
 
   myservo.attach(9);             // do the same for 180 degrees
-  myservo.write(180); delay(3000); 
+  myservo.write(180); delay(6000); 
   myservo.detach(); 
   a180 = 0;
   for (int i = 0; i < 100; i++) a180 += analogRead(A0);
@@ -63,4 +63,3 @@ float fmap(float x, float in_min, float in_max, float out_min, float out_max)
 {   // a floating point version of the map() function
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
-

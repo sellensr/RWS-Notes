@@ -1,5 +1,6 @@
 // All this Serial.print() will get tedious -- define some shortcuts
 #define P Serial.print
+#define PL Serial.println
 #define PCS Serial.print(", ");Serial.print
 #define PCSL Serial.print(", ");Serial.println
 

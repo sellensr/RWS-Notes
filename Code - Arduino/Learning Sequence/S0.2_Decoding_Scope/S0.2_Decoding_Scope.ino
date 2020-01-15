@@ -7,6 +7,7 @@ int depth = 0;
 void setup() {
   depth++;
   Serial.begin(115200);
+  while(!Serial && millis() < 5000);
   show("In setup(), ",i,j,k,&i,&j,&k);
   depth--;
 }
