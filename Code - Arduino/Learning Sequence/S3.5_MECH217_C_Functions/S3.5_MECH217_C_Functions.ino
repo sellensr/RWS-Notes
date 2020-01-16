@@ -15,8 +15,8 @@
  * 
  */
  
-#include "MECH217C.h"
-#include "MECH217C.c"
+#include "MECH217.h"
+#include "MECH217.c"
 
 void setup() {
   Serial.begin(115200);

@@ -11,3 +11,5 @@
 
 // Global Variables are available throughout the code and don't lose their values like locals
 unsigned long timeLast = 0;  // the last time we went through the loop, microseconds
+
+#define BUTTON_PIN 12
