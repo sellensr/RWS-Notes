@@ -1,24 +1,24 @@
 // This code started with Learning Sequence S1, but has been expanded to make it 
 // clearer some of the steps in typical microcontroller application.
+// Revised to work better with the Itsy Bitsy M0
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);         // set the serial port speed
-  Serial.print("\n\nHello World, W01 Serial Plotter\n\n");
-  pinMode(10,INPUT);            // use pin 10 for input from the button
+  while(!Serial && millis() < 5000);
+  Serial.print("\n\nHello World, L01 Serial Plotter\n\ntime, button, photo, led\n");
+  pinMode(12,INPUT_PULLUP);     // use pin 12 for input from the button
   pinMode(13,OUTPUT);           // use pin 13 for output to blink the onboard LED
 }
 
 void loop() {
   unsigned long timeNow = 0;  // [provide your own descriptions for what these lines do]
   boolean but = LOW;          // 
-  unsigned tmp = 0;           // 
   unsigned pht = 0;           // 
   boolean led = 0;            // 
   
   // Then get new values for all of the quantities before you process them.
   timeNow = micros();
-  but = digitalRead(10);      // 
-  tmp = analogRead(A2);       // 
+  but = digitalRead(12);      // 
   pht = analogRead(A3);       // 
   led = digitalRead(13);      //
 
@@ -32,11 +32,9 @@ void loop() {
 
   // Then print out status information or update displays -- maybe not every time
   // Printing to a serial port or display could be the slowest thing in your loop!
-  Serial.print(timeNow);  // Uncomment these two lines to include the timestamp.
+  Serial.print(timeNow/1000000.);  // Uncomment these two lines to include the timestamp.
   Serial.print(", ");
   Serial.print(ibut);
-  Serial.print(", ");
-  Serial.print(tmp);
   Serial.print(", ");
   Serial.print(pht);
   Serial.print(", ");

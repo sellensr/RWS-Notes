@@ -1,18 +1,20 @@
 // Set the pins in af.h to match your processor wiring
+// Make sure to connect the ADC_ACTIVE_PIN to the ADC_DETECT_PIN
 #include "af.h"
 // Global Variables are available throughout the code and don't lose their values like locals
 unsigned long timeNow = 0;          // the time we started the current loop(), microseconds
 float timeNowS = 0.0;               // timeNow, but in seconds, float so it will have decimals
 unsigned long timeLast = 0;         // timeNow, the last time we went through the loop(), microseconds
-unsigned buttonCount = 0;           // number of times the button has been pushed
-unsigned adCount = 0;               // number of analog to digital conversions made
+volatile unsigned buttonCount = 0;  // number of times the button has been pushed
+volatile unsigned adCount = 0;      // number of analog to digital conversions made
 
 // Interrupt Service Routine (ISR) gets called when an interrupt condition happens.
 // This ISR simply counts the number of events, without taking any other action.
-void bp(){  // ISR for a pushed button, may over count if button bounces
+// https://learn.adafruit.com/make-it-switch/debouncing 
+void bp(){  // ISR for a pushed button, will over count if button bounces
   buttonCount++;
 }
-// This ISR copunts each event and also toggles the LED_PIN
+// This ISR counts each event and also toggles the LED_PIN
 void ad(){  // ISR for an ADC event, count should be accurate and not bounce
   adCount++;
   if(digitalRead(LED_PIN) == HIGH) digitalWrite(LED_PIN,LOW);
@@ -20,8 +22,8 @@ void ad(){  // ISR for an ADC event, count should be accurate and not bounce
 }
 
 void setup() {
-  Serial.begin(115200);                   // set the serial port speed
-  while(!Serial);                         // wait for port to wake up
+  Serial.begin(115200);              // set the serial port speed
+  while(!Serial && millis() < 5000); // wait for the USB to wake up
 
   // Put a potentiometer on pins A0/A1/A2 to provide analog input on A1
   pinMode(A0,OUTPUT);                     // Set A0 and A2 to be the ends of the voltage divider
@@ -40,8 +42,9 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN),bp,FALLING);    // Falls on push
   attachInterrupt(digitalPinToInterrupt(ADC_DETECT_PIN),ad,RISING); // Rises on completion
 
-  P("\n\nCounting Buttons and Conversions\n\n");
-  P("Time [s], A1 Mean, A1 RMS, Button Pushes, Conversions Counted in Loop, By Interrupt\n"); // provide headings to name the outputs
+  Serial.printf("\n\nCounting Buttons and Conversions\n\n");
+  Serial.printf("Time [s], A1 Mean, A1 RMS, Button Pushes, "); // provide headings to name the outputs
+  Serial.printf("Conversions Counted in Loop, By Interrupt\n"); // provide headings to name the outputs
 }
 
 void loop() {
@@ -52,25 +55,23 @@ void loop() {
   timeNowS = timeNow / 1000000.;          // time now in seconds, float so it will have decimals
 
   delay(random(85,147));                  // delay a random length of time
-  digitalWrite(ADC_ACTIVE_PIN, LOW);
-  double aValue = analogRead(A1);
+  digitalWrite(ADC_ACTIVE_PIN, LOW);      // pull low to show ADC happening
+  double aValue = analogRead(A1);         // read an analog value and accumulate results
   sum += aValue;
   sum2 += aValue*aValue;
-  n++;
-  digitalWrite(ADC_ACTIVE_PIN, HIGH);
+  n++;                                    // keep count of how often ADC happens
+  digitalWrite(ADC_ACTIVE_PIN, HIGH);     // ADC sequence done
 
-  if(timeNow - lastPrint >= 1000000 && n > 4){
+  if(timeNow - lastPrint >= 5000000 && n > 4){
     lastPrint = timeNow;
     unsigned bc = buttonCount;          // retrieve and then reset the counts right away
     unsigned ac = adCount;             
     buttonCount = 0;
     adCount = 0;
-    P(timeNowS);
-    PCS(sum/n);                         // the mean value
-    PCS(sqrt(sum2-sum*sum/n)/(n-1));    // the RMS value ~ standard deviation
-    PCS(bc);
-    PCS(n);                             // counted in the loop should match
-    PCSL(ac);                           // counted by the interrupt
+    Serial.printf("%8.2f, %8.2f, %4u, %4u, %4u\n", sum/n, // the mean value
+                  sqrt(sum2-sum*sum/n)/(n-1), // the RMS value ~ standard deviation
+                  bc,     // button pushes counted by the interrupt
+                  n, ac); // ADC counted in the loop should match counted by the interrupt
     sum = sum2 = n = 0;                 // reset the count and the sums
   }
   timeLast = timeNow;      // save the old value for next time through the loop

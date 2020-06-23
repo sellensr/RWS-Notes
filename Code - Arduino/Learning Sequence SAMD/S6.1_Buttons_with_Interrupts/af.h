@@ -1,13 +1,4 @@
-// Define some short forms for printing to the Serial Monitor
-// These will make it easy to generate CSV data. 
-// P(thing) expands to Serial.print(thing)
-#define P Serial.print
-// P(thing) expands to Serialln.print(thing)
-#define PL Serial.println
-// PCS(thing) expands to Serial.print(", ");Serial.print(thing)
-#define PCS Serial.print(", ");Serial.print
-// PCSL(thing) expands to Serial.print(", ");Serial.println(thing)
-#define PCSL Serial.print(", ");Serial.println
+#include "RTClib.h"   // RTClib by Adafruit needed for %f in printf()
 
 // Specify how to sample the analog inputs
 #define NAVG           100    // Samples to Average Over
