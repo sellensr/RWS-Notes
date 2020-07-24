@@ -7,12 +7,12 @@
 #include <Adafruit_BMP085.h>
 #include <Adafruit_LIS3DH.h>
 
-Adafruit_BME280 bme;
+Adafruit_BME280 bme280;
 Adafruit_BMP280 bmp280;
 Adafruit_LIS3DH lis = Adafruit_LIS3DH();
-Adafruit_BMP085 bmp;
+Adafruit_BMP085 bmp180;
 
-bool foundBMP = false, foundBME = false, foundLIS = false, foundBMP280 = false;
+bool foundBMP180 = false, foundBME280 = false, foundLIS = false, foundBMP280 = false;
 
 // Global Variables are available throughout the code and don't lose their values like locals
 unsigned long timeLast = 0;  // the last time we went through the loop, microseconds
@@ -49,39 +49,42 @@ void setup() {
 }
 
 void setupI2C(){
-  if (bmp.begin()){ 
-    foundBMP = true;
-    Serial.print("Found a BMP180 sensor at the default address!\n");  
+  // find a pressure sensor if there is one
+  if (bmp180.begin()){ 
+    foundBMP180 = true;
+    Serial.print("Found a BMP180 (or BMP085) sensor!\n");  
   }
   else {
     Serial.println("Could not find a valid BMP180 sensor, trying BME280!");
-    unsigned status;
-    
     // default settings
     // (you can also pass in a Wire library object like &Wire2)
-    status = bme.begin();  
-    if (!status) {
-        Serial.println("Could not find a valid BME280 sensor, trying BMP280!");
-        Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16);
+    unsigned statusBME280 = bme280.begin();  
+    if(!statusBME280) statusBME280 = bme280.begin(0x76);
+    if (!statusBME280) {
+        Serial.println("Could not find a valid BME280 sensor on 0x76 or 0x77, trying BMP280!");
+        Serial.print("SensorID was: 0x"); Serial.println(bme280.sensorID(),16);
         Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
         Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
         Serial.print("        ID of 0x60 represents a BME 280.\n");
         Serial.print("        ID of 0x61 represents a BME 680.\n");
-        unsigned statusBMP280;
-        statusBMP280 = bmp280.begin();
+        unsigned statusBMP280 = bmp280.begin();
         if(!statusBMP280) statusBMP280 = bmp280.begin(0x76);
         if(!statusBMP280) {
-          Serial.println("Could not find a valid BMP280 sensor on either 0x77 or 0x76.");
+          Serial.println("Could not find a valid BMP280 sensor on 0x77 or 0x76.");
         } else {
           foundBMP280 = true;
           Serial.print("Found a BMP280 sensor!\n");  
         }
     } else {
-      foundBME = true; 
+      foundBME280 = true; 
       Serial.print("Found a BME280 sensor!\n");  
     }
   }
-  if (! lis.begin(0x18)) {   // change this to 0x19 for alternative i2c address
+
+  // find an accelerometer if there is one
+  unsigned statusLIS3DH = lis.begin(0x18);
+  if(!statusLIS3DH) statusLIS3DH = lis.begin(0x019);  // alternative i2c address
+  if (!statusLIS3DH) {
     Serial.println("Could not start LIS3DH");
   } else {
     foundLIS = true;
@@ -105,7 +108,8 @@ void loop() {
   double a2[8] = {0};
   // values will be zero unless there's a sensor to provide them
   double temperature = 0, pressure = 0, humidity = 0, gx = 0, gy = 0, gz = 0;
-  
+
+  // get analog data mean and rms
   for(int j = 0;j < N_AVG;j++){
     double v[8] = {0};
     for(int i = 0;i < 6;i++){
@@ -113,6 +117,7 @@ void loop() {
       a[i] += v[i];
       a2[i] += v[i] * v[i];
     }
+    // differential voltage data for A3/A4
     v[6] = v[4] - v[3];
     a[6] += v[6];
     a2[6] += v[6] * v[6];
@@ -122,19 +127,20 @@ void loop() {
     a2[i] /= N_AVG;
   }
 
-  if(foundBMP){
-    temperature = bmp.readTemperature();
-    pressure = bmp.readPressure();
-  }
-  if(foundBME){
-    temperature = bme.readTemperature();
-    pressure = bme.readPressure();    
-    humidity = bme.readHumidity();    
-  }
-  if(foundBMP280){
+  // get pressure / temperature / humidity data if available
+  if(foundBME280){
+    temperature = bme280.readTemperature();
+    pressure = bme280.readPressure();    
+    humidity = bme280.readHumidity();    
+  } else if(foundBMP280){
     temperature = bmp280.readTemperature();
-    pressure = bmp280.readPressure();    
+    pressure = bmp280.readPressure();   
+  } else if(foundBMP180){
+    temperature = bmp180.readTemperature();
+    pressure = bmp180.readPressure();
   }
+
+  // get accelerometer data if available
   if(foundLIS){
     sensors_event_t event; 
     lis.getEvent(&event);
