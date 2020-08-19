@@ -10,8 +10,8 @@
 double AtomV = vRef / 65.535;     // convert 16 bit unsigned from ADC to mV 
 double AtoV  = vRef / 65535.;     // convert 16 bit unsigned from ADC to V 
 
-double potSet = 0;
-unsigned cnt = 1;
+double potSet = 0;    // the average analogRead() value for the current potentiometer setting
+unsigned cnt = 1;     // the number of analogRead() values to average over
 
 void setup() {
   Serial.begin(115200);         // set the serial port speed
@@ -39,14 +39,15 @@ void setup() {
 unsigned long timeLast = 0;  // the last time we went through the loop, microseconds
 
 void loop() {
-  // some random values so everybody's cal data is different
+  // some random values so everybody's cal data is different, 
+  // don't use data from another group without explaining why in your report
   static double divPerDeg = 65535 / 380. + random(-3500,3500) / 1000.;
   static double divZero = 20000 + random(-15000,15000) / 100.; 
   static unsigned long ts = micros();
   unsigned long timeNow = micros();
 
   // Set the target angle to steps of 10 between 0 and 180 changing every second
-  int targetAngle = (timeNow -ts) / 1000000;
+  int targetAngle = (timeNow - ts) / 1000000;
   //targetAngle = targetAngle % 19; // uncomment to do the measurement repeatedly
   targetAngle *= 10;
 
