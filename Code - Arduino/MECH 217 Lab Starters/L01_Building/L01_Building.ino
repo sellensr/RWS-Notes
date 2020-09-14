@@ -8,11 +8,11 @@ void setup() {
 //  delay(5000);                        // 1.5a
 //  while(!Serial);                     // 1.5b
   while(!Serial && millis() < 5000);    // 1.5c
-  Serial.print("\n\nHello World\n\n");  // 1.0
+  Serial.print("\n\nHello World\n\n");  // 1.0  Get serial printing to work
   
   pinMode(BUTTON_PIN,INPUT_PULLUP);                       // 3.3
   
-  pinMode(13,OUTPUT);                                                     // 5.0
+  pinMode(13,OUTPUT);                                                     // 5.0 blink the LED on and off
   
   analogReadResolution(12);                                       // 4.5
   pinMode(2,OUTPUT);                                              // 4.6
@@ -21,13 +21,13 @@ void setup() {
 
 void loop() {
   unsigned long timeNow = 0;                      // 2.1
-  timeNow = micros();                             // 2.0
+  timeNow = micros();                             // 2.0  Get the current time and print it out
   
-//  but = digitalRead(12);                                // 3.0a
+//  but = digitalRead(12);                                // 3.0a Read the pushbutton and print state
 //  boolean but = digitalRead(12);                        // 3.0b
   boolean but = digitalRead(BUTTON_PIN);                  // 3.0c
   
-  unsigned pht = analogRead(A5);                                  // 4.0
+  unsigned pht = analogRead(A5);                                  // 4.0 Read the photocell and print
   boolean led = digitalRead(13);                                  // 4.1
 
   if(digitalRead(13) == HIGH)                                             // 5.0
