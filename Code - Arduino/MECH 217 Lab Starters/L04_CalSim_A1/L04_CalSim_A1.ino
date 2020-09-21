@@ -3,7 +3,7 @@
 #define LED_PIN 13      // built in LED
 #define BUTTON_PIN 12   // pushbutton conection pin
 #define HI_PIN 2        // pin 2 needs to be high for the CdS circuit
-#define vRef 3.300      // This value will depend on your own hardware
+double  vRef = 3.300;      // This value will depend on your own hardware
 
 void setup() {
   // put your setup code here, to run once:
@@ -23,6 +23,9 @@ void setup() {
   digitalWrite(A0,LOW);
   digitalWrite(A2,HIGH);
 
+  // Uncomment the next two lines to switch to the 1.65 volt input scale
+  // analogReference(AR_INTERNAL1V65);
+  // vRef = 1.65;
 }
 
 void loop() {
@@ -31,7 +34,7 @@ void loop() {
   if(!but){
     unsigned a = analogRead(A1);
     int n = micros()%300 - 150;
-    double v = (a + n) / 19860.;
+    double v = (a + n) / 19860. * vRef/3.3;
     Serial.printf("\n%8.3f s, Multimeter Reads %6.3f V\nData: (check %d,%d)\n", 
             timeNowS, v, a, n);
     for(int i = 0;i < 20;i++){
