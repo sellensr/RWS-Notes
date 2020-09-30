@@ -6,7 +6,6 @@ void setup() {
   Serial.print("Time [S], but, tmp, pht, out, tmpV, phtV, outV, phtPC\n");
   pinMode(12,INPUT_PULLUP);     // use pin 12 for input from the button
   pinMode(13,OUTPUT);           // use pin 13 for output to blink the onboard LED
-  pinMode(A0, OUTPUT);
   pinMode(2,OUTPUT);
   digitalWrite(2,HIGH);
   analogReadResolution(16);
