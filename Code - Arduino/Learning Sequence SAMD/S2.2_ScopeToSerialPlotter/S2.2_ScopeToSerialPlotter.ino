@@ -1,13 +1,13 @@
 #include "s.h"
 
 unsigned gridMillis = 100;        // number of milliseconds between grid boxes
-unsigned maxGrid = 3300;          // how high is the grid
+unsigned maxGrid = 100;           // how high is the grid
 unsigned microsPerStep = 2000;    // M0 seems to deliver fairly reliably at 2 ms / step
 double AtomV = 3300 / 65535.;     // convert 16 bit unsigned to mV 
 
 bool couplingAC = true;           // set true to see AC portion only
 bool showDigital = false;         // set true to show pins 9 and 10
-int channels = 4;                 // number of analog channels to display
+int channels = 2;                 // number of analog channels to display
 
 void setup() {
   Serial.begin(300);      // M0 USB is fast no matter what speed
@@ -42,11 +42,11 @@ void loop() {
   static double as[6] = {0};
 
   for(int i = 0; i < 4; i++){
-    a[i] = analogRead(A0+i) * AtomV;
+    a[i] = analogRead(A1+i) * AtomV;
     if(as[i] != 0) as[i] = (1. - w) * as[i] + w * a[i];
     else as[i] = a[i];    
   }
-  int gl = maxGrid * -0.01;
+  int gl = maxGrid * -1.01;
   int gh = maxGrid *  1.01;
   if(couplingAC) gh = abs(gl);
   if(millis()%(2*gridMillis) >= gridMillis){    // swap every gridMillis
@@ -62,14 +62,14 @@ void loop() {
   Serial.printf("Grid_Spacing~%dms Values_in_mV.... ", gridMillis);
   if(showDigital) Serial.printf("D9.... D10.... ");
 //  Serial.printf("A0.... A0s.... A1.... A1s.... A2.... A2s.... A3.... A3s....\n");
-  for(int i = 0; i < channels; i++) Serial.printf("A%d.... A%ds.... ", i, i);
+  for(int i = 1; i <= channels; i++) Serial.printf("A%d.... A%ds.... ", i, i);
   Serial.printf("\n");
   }
   if (micros() - lastSerial1 > 1500000) {   // send a little to Serial1 now and then
     lastSerial1 = micros();
     Serial1.printf("A few characters will be hard to decode..."); 
   }
-  if (millis() % 2000 > 1000 && micros() - lastPrint > microsPerStep && digitalRead(BUTTON_PIN)) {
+  if (millis() % 4000 > 3000 && micros() - lastPrint > microsPerStep && digitalRead(BUTTON_PIN)) {
     lastPrint = micros();
     Serial.printf("%d, %d",
                   grid1, grid2); // vertical grid lines
