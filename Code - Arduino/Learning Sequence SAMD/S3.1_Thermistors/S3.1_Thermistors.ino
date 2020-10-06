@@ -6,6 +6,7 @@
 // Assumes reference resistor on high side, supplied from pin 2
 // Resolution set to 16 bit
 
+// just calling getThermistor() with no arguments will assume all these settings
 double getThermistor(unsigned THERMISTORPIN = A5, 
                       double BCOEFFICIENT = 3950, 
                       double THERMISTORNOMINAL = 10000, 
