@@ -14,15 +14,15 @@
 #include <Servo.h>
 //#include <EEPROM.h>
 
-#define CALIB_MAX 512
-#define CALIB_MIN 100
-#define SAMPLE_DELAY 15 // in ms, 50ms seems good, takes about 26 seconds of recording
+#define CALIB_MAX 750
+#define CALIB_MIN 150
+#define SAMPLE_DELAY 30 // in ms, 50ms seems good, takes about 26 seconds of recording
 #define SAMPLES   512
 
 uint8_t recordButtonPin = 10;
 uint8_t playButtonPin = 7;
 uint8_t servoPin = 9;
-uint8_t feedbackPin = A0;
+uint8_t feedbackPin = A4;
 uint8_t ledPin = 13;
 uint8_t eeprom[SAMPLES];  // an array to take the place of the EEPROM
 
@@ -30,26 +30,13 @@ Servo myServo;
   
 void setup() {
   Serial.begin(115200);
-  while(!Serial && millis() < 4000);
+  while(!Serial && millis() < 10000);
   pinMode(recordButtonPin, INPUT_PULLUP);
   digitalWrite(recordButtonPin, HIGH);
   pinMode(playButtonPin, INPUT_PULLUP);
   digitalWrite(playButtonPin, HIGH);
   pinMode(ledPin, OUTPUT);
-  
-  Serial.println("\n\nServo RecordPlay\n");
-  Serial.println("Connect Servo power (red) to +5 and black to ground.");
-  Serial.print("Connect Servo control (orange) on pin ");
-  Serial.println(servoPin);
-  Serial.println("Connect buttons or just use a jumper to record and play back from EEPROM.");
-  Serial.print("To record a sequence of motions, pull to ground and then release pin ");
-  Serial.println(recordButtonPin);
-  Serial.println("After releasing, move the servo by hand until the recording time runs out.");
-  Serial.print("To play back the recording, pull to ground and then release pin ");
-  Serial.println(playButtonPin);
-  Serial.print("Each recording or playback session will last about ");
-  Serial.print(SAMPLE_DELAY * 26.15 / 50.,0);
-  Serial.println(" seconds.\n");
+  printInstructions();
 }
 
 void loop() {
@@ -60,15 +47,17 @@ void loop() {
    delay(20);
    // OK released!
    recordServo(servoPin, feedbackPin, recordButtonPin);
+   printInstructions();
  }
  
-  if (! digitalRead(playButtonPin)) {
+ if (! digitalRead(playButtonPin)) {
    delay(10);
    // wait for released
    while (! digitalRead(playButtonPin));
    delay(20);
    // OK released!
    playServo(servoPin, playButtonPin);
+   printInstructions();
  }
 }
 
@@ -118,4 +107,22 @@ void recordServo(uint8_t servoPin, uint8_t analogPin, uint8_t buttonPin) {
 
   Serial.println("Done");
   delay(250);
+}
+
+void printInstructions() {
+  Serial.println("\n\nServo RecordPlay\n");
+  Serial.println("Connect Servo power (red) to +5 (USB) and black to ground.");
+  Serial.print("Connect Servo control (orange) on pin ");
+  Serial.println(servoPin);
+  Serial.println("Connect the white analog output line to A4 for feedback.");
+  Serial.println("This voltage peaks at 2.5V, so it is OK for 3.3V boards like the Itsy Bitsy M0.");
+  Serial.println("Connect buttons or just use a jumper to record and play back from EEPROM.\n");
+  Serial.print("To record a sequence of motions, pull to ground and then release pin ");
+  Serial.println(recordButtonPin);
+  Serial.println("After releasing, move the servo by hand until the recording time runs out.\n");
+  Serial.print("To play back the recording, pull to ground and then release pin ");
+  Serial.println(playButtonPin);
+  Serial.print("Each recording or playback session will last about ");
+  Serial.print(SAMPLE_DELAY * 26.15 / 50.,0);
+  Serial.println(" seconds.\n");
 }
