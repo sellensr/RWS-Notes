@@ -15,9 +15,7 @@ void setup() {
   m0dotStar.setBrightness(0);
   m0dotStar.show();   
 
-  // Set the resolutions so that both inputs and outputs 
-  // are 16 bit, going from 0-65535
-  analogWriteResolution(16);
+  // Set the resolutions so that input is 16 bit, going from 0-65535
   analogReadResolution(16);
 
   // Make A2 a ground pin so you can just plug in the pot on A0/A1/A2

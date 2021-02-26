@@ -37,7 +37,6 @@ void setup() {
   pinMode(LOW_PIN,OUTPUT);
   digitalWrite(LOW_PIN,LOW);
   analogReadResolution(16);
-  analogWriteResolution(16);
 //  analogReference(AR_INTERNAL1V65);
   setupMode(meterMode);
   digitalWrite(LED_PIN,LOW);
