@@ -7,6 +7,7 @@ int meterMode = 0;  // 0 for DC voltage, 1 for resistance/continuity
 
 #define LED_PIN 13
 #define BUTTON_PIN 12
+#define LOW_PIN 10
 #define HI_PIN 2
 #define vRef 3.300  // this voltage value should be adjusted to match your own hardware
 #define rRef 10000  // this resistance value should be adjusted to match your own hardware
@@ -33,23 +34,22 @@ void setup() {
   pinMode(BUTTON_PIN,INPUT_PULLUP);
   pinMode(HI_PIN,OUTPUT);
   digitalWrite(HI_PIN,HIGH);
+  pinMode(LOW_PIN,OUTPUT);
+  digitalWrite(LOW_PIN,LOW);
   analogReadResolution(16);
+  analogWriteResolution(16);
 //  analogReference(AR_INTERNAL1V65);
-  // Use A0 and A2 to supply the potentiometer so that the wiper on A1 is an adjustable voltage source.
-  pinMode(A0,OUTPUT);
-  pinMode(A2,OUTPUT);
-  digitalWrite(A0,LOW);
-  digitalWrite(A2,HIGH);
   setupMode(meterMode);
   digitalWrite(LED_PIN,LOW);
 }
 
 void setupMode(int mode) {     
   // Use A0 and A2 to supply the potentiometer so that the wiper on A1 is an adjustable voltage source.
-  pinMode(A0,OUTPUT);
+  // Make A2 a ground pin so you can just plug in the pot on A0/A1/A2 and it will follow A0 output
   pinMode(A2,OUTPUT);
-  digitalWrite(A0,LOW);
-  digitalWrite(A2,HIGH);
+  digitalWrite(A2,0);
+  // Start with A0 at +3.3V for the pot
+  analogWrite(A0,65535);
 }
 
 void loop() {
@@ -109,8 +109,8 @@ void loop() {
                   a[5], sqrt(a2[5] - a[5]*a[5]) * 1000.);   
     Serial.printf("          Diff 3/4 = %8.5f V DC (%7.2f mV)\n",
                   a[6], sqrt(a2[6] - a[6]*a[6]) * 1000.);   
-    Serial.printf("  Resistance 5/GND = %8.0f Ohms (for set rRef value)\n",
-                  a[5] / (vRef - a[5]) * rRef);   
+    Serial.printf("  Resistance 5/GND = %8.0f Ohms (rRef = %6.0f Ohm)\n",
+                  a[5] / (vRef - a[5]) * rRef, (double) rRef);   
     Serial.printf("\n");   
   }
   timeLast = timeNow;      // save the old value for next time through the loop
