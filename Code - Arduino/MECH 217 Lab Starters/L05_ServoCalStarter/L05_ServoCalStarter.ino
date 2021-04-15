@@ -1,6 +1,6 @@
 #include <Servo.h>
 uint8_t servoPin = 9;     // make sure these match your wiring
-uint8_t feedbackPin = A4;
+uint8_t feedbackPin = A3;
 uint8_t ledPin = 13;
 
 Servo myservo;            // create servo object to control a servo

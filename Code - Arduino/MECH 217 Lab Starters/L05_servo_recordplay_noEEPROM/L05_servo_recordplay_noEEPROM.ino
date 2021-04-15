@@ -9,20 +9,20 @@
 // Modified further by RWS 2019-12-23 to use an array in memory instead of EEPROM
 // making it suitable for processors other than the UNO.
 //      - set play button to 7 because there is no pin 8 on itsy bitsy
-
+//      - switched feedback pin to A3 to match up with other activities 2021-03-24
 
 #include <Servo.h>
 //#include <EEPROM.h>
 
-#define CALIB_MAX 750
-#define CALIB_MIN 150
-#define SAMPLE_DELAY 30 // in ms, 50ms seems good, takes about 26 seconds of recording
+#define CALIB_MAX 750   // analogRead() value corresponding to 180 degrees
+#define CALIB_MIN 150   // analogRead() value corresponding to 0 degrees
+#define SAMPLE_DELAY 30 // in ms, 30ms seems good, takes about 15 seconds of recording
 #define SAMPLES   512
 
 uint8_t recordButtonPin = 10;
 uint8_t playButtonPin = 7;
 uint8_t servoPin = 9;
-uint8_t feedbackPin = A4;
+uint8_t feedbackPin = A3;
 uint8_t ledPin = 13;
 uint8_t eeprom[SAMPLES];  // an array to take the place of the EEPROM
 
@@ -33,6 +33,9 @@ void setup() {
   while(!Serial && millis() < 10000);
   pinMode(recordButtonPin, INPUT_PULLUP);
   digitalWrite(recordButtonPin, HIGH);
+  pinMode(12, OUTPUT);  // ground for the pushbutton if connected 10 to 12
+  digitalWrite(12, 0);
+
   pinMode(playButtonPin, INPUT_PULLUP);
   digitalWrite(playButtonPin, HIGH);
   pinMode(ledPin, OUTPUT);
@@ -114,7 +117,7 @@ void printInstructions() {
   Serial.println("Connect Servo power (red) to +5 (USB) and black to ground.");
   Serial.print("Connect Servo control (orange) on pin ");
   Serial.println(servoPin);
-  Serial.println("Connect the white analog output line to A4 for feedback.");
+  Serial.println("Connect the white analog output line to A3 for feedback.");
   Serial.println("This voltage peaks at 2.5V, so it is OK for 3.3V boards like the Itsy Bitsy M0.");
   Serial.println("Connect buttons or just use a jumper to record and play back from EEPROM.\n");
   Serial.print("To record a sequence of motions, pull to ground and then release pin ");
