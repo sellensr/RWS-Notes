@@ -30,7 +30,7 @@ Servo myServo;
   
 void setup() {
   Serial.begin(115200);
-  while(!Serial && millis() < 10000);
+  while(!Serial && micros() < 10000000);
   pinMode(recordButtonPin, INPUT_PULLUP);
   digitalWrite(recordButtonPin, HIGH);
   pinMode(12, OUTPUT);  // ground for the pushbutton if connected 10 to 12

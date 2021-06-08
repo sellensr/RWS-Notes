@@ -1,3 +1,4 @@
+// Consider using the newer ServoCalList with M0 processors for better results
 #include <Servo.h>
 uint8_t servoPin = 9;     // make sure these match your wiring
 uint8_t feedbackPin = A3;
@@ -9,7 +10,7 @@ float aZero, a180;        // the analog read values corresponding to zero and 18
 
 void setup() {
   Serial.begin(115200);
-  while(!Serial && micros() < 10000);
+  while(!Serial && micros() < 10000000);
   analogReadResolution(16);
 
   // Start by getting some calibration values

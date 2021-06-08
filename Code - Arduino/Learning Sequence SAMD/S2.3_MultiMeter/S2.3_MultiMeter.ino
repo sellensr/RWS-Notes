@@ -2,6 +2,8 @@
 
 // Global Variables are available throughout the code and don't lose their values like locals
 unsigned long timeLast = 0;  // the last time we went through the loop, microseconds
+unsigned long timeNow = micros();      // the time we started this loop, microseconds
+unsigned long dt = timeNow - timeLast; // the time difference since last loop, microseconds
 int meterMode = 0;  // 0 for DC voltage, 1 for resistance/continuity
 
 
@@ -22,7 +24,7 @@ void setup() {
   while(!Serial && millis() < 5000);
   Serial.print("\n\nS2.3 Multi-Meter Output on Serial Monitor\n");
   Serial.print(    "=========================================\n\n");
-  Serial.print("Put a reference resistor (minimum 2K) between pin 2 and pin A5.\n");
+  Serial.print("Put a reference resistor (minimum 2K) between pin 2 or +3.3 and pin A5.\n");
   Serial.print("Plug a potentiometer into pins A0, A1, A2 to provide an adjustable voltage.\n");
   Serial.printf("Push the button to pull pin %d low and update metering quickly.\n",
                 BUTTON_PIN);
@@ -48,14 +50,15 @@ void setupMode(int mode) {
   pinMode(A2,OUTPUT);
   digitalWrite(A2,0);
   // Start with A0 at +3.3V for the pot
-  analogWrite(A0,65535);
+  analogWrite(A0,1023);
 }
 
 void loop() {
+  timeLast = timeNow;      // save the old value before changing timeNow
   static unsigned long lastPrint = 0, lastLegend = 0, lastSerial1 = 0;
   // Keep time in microseconds as an unsigned long for best accuracy.
-  unsigned long timeNow = micros();      // the time we started this loop, microseconds
-  unsigned long dt = timeNow - timeLast; // the time difference since last loop, microseconds
+  timeNow = micros();      // the time we started this loop, microseconds
+  dt = timeNow - timeLast; // the time difference since last loop, microseconds
   unsigned long tau = 100000;            // the smoothing time constant in microseconds bigger = smoother, slower
   // since dt usually less than tau, we must cast the calculation as (float) to avoid e.g. 3333/10000 = 0
   float w = min(1.,(float) dt/tau);      // weight to give the latest reading of a in smoothing
@@ -112,6 +115,5 @@ void loop() {
                   a[5] / (vRef - a[5]) * rRef, (double) rRef);   
     Serial.printf("\n");   
   }
-  timeLast = timeNow;      // save the old value for next time through the loop
   delay(3);
 }

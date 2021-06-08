@@ -32,40 +32,43 @@ void setup() {
   Serial.begin(115200);     // set the serial port speed
   while(!Serial && millis() < 5000);
   Serial.printf("\n\nRick's S1.3\n\n"); // worth printing out the name of the sketch to document
-  Serial.printf("Time [s], Time [us], Time [us], Pin 12, A0, dt, w, A0 Smoothed\n"); // provide headings to name the outputs
+  //Serial.printf("Time [s], Time [us], Time [us], Pin 12, A3, dt, w, A3 Smoothed\n"); // provide headings to name the outputs
+  Serial.printf("Time [s], A3, A3 Smoothed\n"); // provide headings to name the outputs
   pinMode(12,INPUT_PULLUP);
   pinMode(13,OUTPUT);
-  analogReadResolution(12);
+  analogReadResolution(16);
 }
 
 void loop() {
-  // Keep time in microseconds as an unsigned long for best accuracy.
-  unsigned long timeNow = micros();      // the time we started this loop, microseconds
+  timeLast = timeNow;      // save the old value before getting the new one
+  timeNow = micros();      // the time we started this loop, microseconds
+  dt = timeNow - timeLast; // the time difference since last loop, microseconds
+  
   unsigned long timeNow2 = t2();         // just a test to show time passes
   unsigned long timeNow3 = t3();         // move along
-  // unsigned long can hold 0,1,2,...,4294967295, about 4 billion, a little more than 71 minutes of us
   float timeNowS = timeNow / 1000000.;   // time now in seconds, float so it will have decimals
-  // 32 bit floats have 6 or 7 significant figures and can reach +/- 3.4E38, so timeNowS is less precise 
-  unsigned long dt = timeNow - timeLast; // the time difference since last loop, microseconds
+
+  // put a slowly changing square wave on A0 for testing (connect A0 and A3 to read it)
+  if(timeNow % 2000000 < 1000000) analogWrite(A0,1000); else analogWrite(A0,100);
 
   // get input and calculate values
   int d = digitalRead(12);            // 16 bit integer can hold -32768,...,-2,-1,0,1,2,..., 32767
-  unsigned a = analogRead(A0);        // 16 bit unsigned can hold whole numbers 0,1,2,...,65535 
+  unsigned a = analogRead(A3);        // 16 bit unsigned can hold whole numbers 0,1,2,...,65535 
   byte led = digitalRead(13);         // 8 bit byte can hold whole numbers 0,1,2,...,255
   unsigned long tau = 100000;         // the smoothing time constant in microseconds bigger = smoother, slower
   // since dt usually less than tau, we must cast the calculation as (float) to avoid e.g. 3333/10000 = 0
-  float w = min(1.,(float) dt/tau);   // weight to give the latest reading of a in smoothing
+  float w = (float) dt/tau;           // weight to give the latest reading of a in smoothing
   static float as = 0;                // exponentially smoothed version of a, static so it persists
-  as = w * a + (1-w) * as;            // weighted average will smooth the data to reduce noise
-  
+  if(w < 1.0) 
+    as = w * a + (1-w) * as;          // weighted average will smooth the data to reduce noise
+  else as = a;                        // use the latest value if it has been a long time, dt > tau
   if(led == 1) digitalWrite(13,0);
   else digitalWrite(13,1);
 
-  Serial.printf("%8.3f, %9u, %9u, %d, %5u, %5u, %8.5f, %9.3f\n",
-                timeNowS, timeNow2, timeNow3, d, a, dt, w, as);
-
-  timeLast = timeNow;      // save the old value for next time through the loop
+  //Serial.printf("%8.3f, %9u, %9u, %d, %5u, %5u, %8.5f, %9.3f\n",
+  //              timeNowS, timeNow2, timeNow3, d, a, dt, w, as);
+  Serial.printf("%8.3f, %5u, %9.3f\n", timeNowS, a, as);
 
   // The only time to use delay is to slow down a sketch so you can see what is going on
-  delay(0);   // delay() is bad -- drone crashes happen in split seconds!
+  delay(5);   // delay() is bad -- drone crashes happen in split seconds!
 }

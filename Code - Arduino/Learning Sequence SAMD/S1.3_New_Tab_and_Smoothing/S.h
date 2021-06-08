@@ -10,4 +10,6 @@
 #define PCSL Serial.print(", ");Serial.println
 
 // Global Variables are available throughout the code and don't lose their values like locals
+unsigned long timeNow = 0;
 unsigned long timeLast = 0;  // the last time we went through the loop, microseconds
+unsigned long dt = timeNow - timeLast;
