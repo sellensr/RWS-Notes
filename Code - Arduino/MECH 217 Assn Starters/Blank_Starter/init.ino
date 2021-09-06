@@ -6,7 +6,7 @@ void setup217Kit(){
   uno.begin();
 
   // Setup some digital IO pins
-  pinMode(LED_PIN, OUTPUT);           // the small LEDbeside the reset button
+  pinMode(LED_PIN, OUTPUT);           // the small LED beside the reset button
   pinMode(BUTTON_PIN, INPUT_PULLUP);  // the button on pin 12 and the 
   pinMode(LOW_PIN, OUTPUT);           // other side of the button to ground on pin 10
   digitalWrite(LOW_PIN, LOW);
