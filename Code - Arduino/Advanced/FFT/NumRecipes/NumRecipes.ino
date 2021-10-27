@@ -22,17 +22,18 @@ void loop(){
 
   // Generate a simulated signal and plug it into the data arrays
   Serial.print("__t_[s]__ signal_[-] _signal_[-]_ "); Serial.print(NFFT); Serial.print("_points\n");
-  for (int i=0;i<NFFT;i++){
-    int real = i*2+1;     // real components go in elements 1, 3, 5, etc. (FORTRAN throwback)
-    int imag = i*2+2;     // imaginary components go in elements 2, 4, 6, etc.
-    dat[real] = 0.0;      // any constant offset should go to first fourier component
-    dat[real] = sin(2.*3.141592654 * f * i * dt);         // real part gets base signal
-    dat[real] += 0.3 * cos(2.*3.141592654 * f2 * i * dt); // real part gets more
-    dat[real] += 0.1 * sin(2.*3.141592654 * f3 * i * dt); // real part gets more
-    dat[imag] = 0.;
+  for (int i=0;i<NFFT;i++){                                                               //    dat[0] = ignored
+    int real = i*2+1;     // real components go in elements 1, 3, 5, etc. (FORTRAN throwback)   dat[1] = first real data point
+    int imag = i*2+2;     // imaginary components go in elements 2, 4, 6, etc.                  dat[2] = first imaginary data point (probably 0)
+    dat[real] = 0.0;      // any constant offset should go to first fourier component           dat[3] = second real data point
+    dat[real] = sin(2.*3.141592654 * f * i * dt);         // real part gets base signal         dat[4] = second imaginary data point (probably 0)
+    dat[real] += 0.3 * cos(2.*3.141592654 * f2 * i * dt); // real part gets more                ...
+    dat[real] += 0.1 * sin(2.*3.141592654 * f3 * i * dt); // real part gets more                dat[127] = 64th real data point
+    dat[imag] = 0.;                                       // all imaginary points are 0         dat[128] = 64th imaginary data point  
     
     idat[i] = dat[real] * 1400;   // scaled, no imaginary part to integer version ZeroFFT()
-    
+
+    // print the signal so we can see it on the plotter
     Serial.print(i*dt,6);
     Serial.print(" ");
     Serial.print(dat[real]);
@@ -46,12 +47,12 @@ void loop(){
   // Process the data array with a floating point Fourier transform
   unsigned long t1 = micros();  // check the time 
   four1(dat,NFFT,1);            // do the transform
-  psd(dat,NFFT);                // calculate the power spectral density
-  t1 = micros()-t1;             // how long did it take?
-  
-  unsigned long t2 = micros();  // check the time 
-  ZeroFFT(idat,NFFT);
-  t2 = micros()-t2;
+  psd(dat,NFFT);                // calculate the power spectral density (sum of squares of components at f) so after processing by psd():
+  t1 = micros()-t1;             // how long did it take?                                        dat[0] = DC power spectral density point (f = 0)
+                                //                                                              dat[1] = first oscillatory PSD (f = 1 / (n_FFT * delta t)
+  unsigned long t2 = micros();  // check the time                                               dat[2] = second oscillatory PSD (f = 2 / (n_FFT * delta t)
+  ZeroFFT(idat,NFFT);           // do the integer base transform                                ...
+  t2 = micros()-t2;             // take the difference as elapsed time                          dat[32] = 32nd osciallatory PSD (f = 32 / (n_FFT * delta t)
     
   // Print out some results 
   Serial.print("freq_[kHz] log(PSD) log(idat[]^2)\n");
