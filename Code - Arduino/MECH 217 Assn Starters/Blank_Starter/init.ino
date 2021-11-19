@@ -1,3 +1,5 @@
+// If you get an error here, check the previous tabs for mismatched { } and ( )
+// that spilled over from the code you wrote in the main tab or the get tab!
 void setup217Kit(){
   // Initialize the Serial port for writing output to the monitor or plotter...
   Serial.begin(115200);
@@ -14,8 +16,10 @@ void setup217Kit(){
   digitalWrite(HI_PIN, HIGH);
   pinMode(A2, OUTPUT);                // set pin A2 low to provide a ground for the pot
   digitalWrite(A2, LOW);
-  
-  analogReadResolution(16);           // use the 16 bit resolution everywhere in MECH 217, except for UNO!
+
+  #ifndef ARDUINO_ARCH_AVR            // Check at compile time that it's not an UNO!
+    analogReadResolution(16);         // use the 16 bit resolution everywhere in MECH 217, except for UNO!
+  #endif
   analogWrite(A0, 1023);              // make A0 a 3.3 V output for the pot until the code changes it
   m0dotStarOff();                     // Turn off the bright LED in the middle of the board (glare)
   //uno.i2cScan();                      // you may want to turn this on to see what's attached to I2C
