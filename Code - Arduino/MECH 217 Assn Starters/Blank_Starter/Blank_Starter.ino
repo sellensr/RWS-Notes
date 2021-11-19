@@ -8,6 +8,7 @@ void setup() {
 }
 
 void loop() {
+  uno.run();  // monitors your code for how fast it goes through loops
   // Update the global variables for the time in this loop
   timeLast = timeNow;      // the last time we went through the loop, microseconds
   timeNow = micros();      // the time we started this loop, microseconds
@@ -15,6 +16,8 @@ void loop() {
   
   // put your main code here, to run repeatedly:
 
-  
+  // Leave the rest of this code in place, but comment out when you don't need it
+  Serial.printf("Average dt = %8.1f us, this loop %8.1f us, maximum %8.1f\n", 
+                  uno.dtAvg(), uno.dt(), uno.dtMax());
   delay(20);  // delay only to slow things down so you can see
 }
