@@ -1,7 +1,7 @@
-// Track some variables to find out where the satck is and more about the memory map
+// Track some variables to find out where the stack is and more about the memory map
 #define M0_BASE   0x20000000
-#define UNO_BASE  0
-#define BASE 0
+#define UNO_BASE  0x100
+#define BASE M0_BASE
 
 byte iByte0 = 42;
 byte iByte1 = 42;
