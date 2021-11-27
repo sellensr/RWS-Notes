@@ -1,7 +1,13 @@
 void sendA0(double mvOut){
-  // write out to A0 so it provides a voltage corresponding to mvOut
-  analogWrite(A0, mvOut / 3300 * 1023); // scale to 0-1023 for output
+  // Write out to A0 so it provides a voltage corresponding to mvOut
+  // Doesn't work with UNO or other boards that have no DAC on A0
+  unsigned res = 1023;  // DAC resolution is 10 bit for M0 (SAMD21)
+#ifdef __SAMD51__       //      [compile time test for board type]
+  res = 4095;           //    and 12 bit for M4 (SAMD51) processors
+#endif
+  analogWrite(A0, mvOut / 3300 * res); // scale for output
 }
+
 double sqWave(double freq){
   // Return a square wave at frequency freq 
   // with amplitude almost covering the full 0 to 3300 mV range
