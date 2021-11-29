@@ -4,7 +4,7 @@ void setup217Kit(){
   // Initialize the Serial port for writing output to the monitor or plotter...
   Serial.begin(115200);
   // Wait up to 10 seconds for it to be ready
-  while(!Serial && millis() < 10000);
+  while(!Serial && millis() < 10000) delay(100);
   uno.begin();
 
   // Setup some digital IO pins
