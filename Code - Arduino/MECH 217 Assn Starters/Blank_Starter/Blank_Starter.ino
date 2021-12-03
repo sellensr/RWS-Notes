@@ -15,7 +15,7 @@ void loop() {
   dt = timeNow - timeLast; // the time difference since last loop, microseconds
   
   // put your main code here, to run repeatedly:
-  sendA0(triWave(0.01));
+  sendA0(triWave(0.01));            // you probably want to delete this !!!
   Serial.println(analogRead(A3));   // you probably want to delete this !!!
 
   // Leave the rest of this code in place, but comment out when you don't need it
