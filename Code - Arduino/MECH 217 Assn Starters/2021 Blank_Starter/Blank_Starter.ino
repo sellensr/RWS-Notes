@@ -1,5 +1,4 @@
 // This blank Starter has all of the basics covered so you can focus on your code
-// 2022-01-10 removed dotstar elements because the base M0 feather doesn't need it.
 #include "globals.h" 
 
 void setup() {

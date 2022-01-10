@@ -21,5 +21,6 @@ void setup217Kit(){
     analogReadResolution(16);         // use the 16 bit resolution everywhere in MECH 217, except for UNO!
   #endif
   analogWrite(A0, 1023);              // make A0 a 3.3 V output for the pot until the code changes it
+  m0dotStarOff();                     // Turn off the bright LED in the middle of the board (glare)
   //uno.i2cScan();                      // you may want to turn this on to see what's attached to I2C
 }
