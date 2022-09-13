@@ -5,7 +5,7 @@ void setup217Kit(){
   Serial.begin(115200);
   // Wait up to 10 seconds for it to be ready
   while(!Serial && millis() < 10000) delay(100);
-  uno.begin();
+  //uno.begin();
 
   // Setup some digital IO pins
   pinMode(LED_PIN, OUTPUT);           // the small LED beside the reset button

@@ -5,8 +5,8 @@
 // If you get an error here, check the previous tabs for mismatched { } and ( )
 // that spilled over from the code you wrote in the main tab or the get tab!
 #include <RTClib.h>           // Because Itsy Bitsy M0 needs it for printf("%8.3f...
-#include "RWS_UNO.h"          // Mostly for the i2c support and timing
-RWS_UNO uno = RWS_UNO();      // an Arduino utilities object we can use
+//#include "RWS_UNO.h"          // Mostly for the i2c support and timing
+//RWS_UNO uno = RWS_UNO();      // an Arduino utilities object we can use
 
 // Global Variables are available throughout the code and don't lose their values like locals
 unsigned long timeLast = 0;  // the last time we went through the loop, microseconds

@@ -9,7 +9,7 @@ void setup() {
 }
 
 void loop() {
-  uno.run();  // monitors your code for how fast it goes through loops
+  //uno.run();  // monitors your code for how fast it goes through loops
   // Update the global variables for the time in this loop
   timeLast = timeNow;      // the last time we went through the loop, microseconds
   timeNow = micros();      // the time we started this loop, microseconds
