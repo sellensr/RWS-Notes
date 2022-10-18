@@ -7,6 +7,11 @@
 // Resolution set to 16 bit
 
 // just calling getThermistor() with no arguments will assume all these settings
+
+// copying and pasting this code to an assignment will generate problems for you and poor marks
+
+// this function uses optional, preinitialized arguments, that require a declaration before the function is used
+// optional arguments are a C++ addition and beyond the scope of MECH 217, so your function should have simple arguments.
 double getThermistor(unsigned THERMISTORPIN = A5, 
                       double BCOEFFICIENT = 3950, 
                       double THERMISTORNOMINAL = 10000, 
